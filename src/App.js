@@ -1,4 +1,3 @@
-import './App.css';
 import { fetchProducts } from "./services/api";
 import { useEffect, useState, useRef } from "react";
 import ProductTable from "./components/ProductTable";
