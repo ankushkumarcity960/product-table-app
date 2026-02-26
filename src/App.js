@@ -1,23 +1,72 @@
-import logo from './logo.svg';
 import './App.css';
+import { fetchProducts } from "./services/api";
+import { useEffect, useState, useRef } from "react";
+import ProductTable from "./components/ProductTable";
+
 
 function App() {
+
+const [products, setProducts] = useState([]);
+const [hasMore, setHasMore] = useState(true);
+const [skip, setSkip] = useState(0);
+const limit = 10;
+const observer = useRef(null);
+
+const loadProducts = async () => {
+  if (!hasMore) return;
+
+  const newProducts = await fetchProducts(skip, limit);
+
+  if (newProducts.length === 0) {
+    setHasMore(false);
+    return;
+  }
+
+  setProducts((prev) => [...prev, ...newProducts]);
+};
+
+useEffect(() => {
+  loadProducts();
+}, [skip]);
+
+const lastProductRef = (node) => {
+  if (!hasMore) return;
+
+  if (observer.current) observer.current.disconnect();
+
+  observer.current = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMore) {
+      setSkip((prev) => prev + limit);
+    }
+  });
+
+  if (node) observer.current.observe(node);
+};
+
+
+
+const updateTitle = (id, newTitle) => {
+  const updatedProducts = products.map((product) =>
+    product.id === id
+      ? { ...product, title: newTitle }
+      : product
+  );
+
+  setProducts(updatedProducts);
+};
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+   
+<div className="app-container">
+      <h1>Product Table App</h1>
+    <ProductTable products={products} 
+        updateTitle={updateTitle}
+          lastProductRef={lastProductRef}
+
+
+    />
+
     </div>
   );
 }
