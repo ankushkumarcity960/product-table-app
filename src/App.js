@@ -1,5 +1,5 @@
 import { fetchProducts } from "./services/api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import ProductTable from "./components/ProductTable";
 
 
@@ -11,22 +11,27 @@ const [skip, setSkip] = useState(0);
 const limit = 10;
 const observer = useRef(null);
 
-const loadProducts = async () => {
-  if (!hasMore) return;
+const loadProducts = useCallback(async () => {
+  if (loading || !hasMore) return;
+
+  setLoading(true);
 
   const newProducts = await fetchProducts(skip, limit);
 
   if (newProducts.length === 0) {
     setHasMore(false);
+    setLoading(false);
     return;
   }
 
   setProducts((prev) => [...prev, ...newProducts]);
-};
+
+  setLoading(false);
+}, [skip, loading, hasMore]);
 
 useEffect(() => {
   loadProducts();
-}, [skip]);
+}, [loadProducts]);
 
 const lastProductRef = (node) => {
   if (!hasMore) return;
