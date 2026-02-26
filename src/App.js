@@ -7,6 +7,7 @@ function App() {
 
 const [products, setProducts] = useState([]);
 const [hasMore, setHasMore] = useState(true);
+const [loading, setLoading] = useState(false);
 const [skip, setSkip] = useState(0);
 const limit = 10;
 const observer = useRef(null);
